@@ -28,10 +28,10 @@ import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const theme = useMantineTheme();
-  const [files, setFiles] = useState<FileWithPath[]>([]);
+  const [files, setFiles] = useState([]);
   const [fileUpload, setFileUpload] = useState(false);
-  const [selectedBucket, setSelectedBucket] = useState<string | null>(null);
-  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [selectedBucket, setSelectedBucket] = useState(null);
+  const [selectedDomain, setSelectedDomain] = useState(null);
 
   const { data: bucketData } = useQuery({
     queryKey: ["get-bucket-data"],
@@ -44,14 +44,14 @@ const Dashboard = () => {
   });
 
   const handleDrop = async (acceptedFiles: FileWithPath[]) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]); 
-    await handleFileUpload(acceptedFiles); 
+    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+    await handleFileUpload(acceptedFiles);
   };
-  
+
   const handleFileUpload = async (files: FileWithPath[]) => {
     if (!files.length) return;
     setFileUpload(true);
-  
+
     try {
       const results = await Promise.all(files.map(uploadFile));
       results.forEach(({ status, message }) =>
@@ -64,7 +64,7 @@ const Dashboard = () => {
       setFileUpload(false);
     }
   };
-  
+
 
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -92,7 +92,7 @@ const Dashboard = () => {
         leftSection={<IconSearch size={18} />}
         value={selectedBucket}
         onChange={setSelectedBucket}
-        data={bucketData?.map((bucket:any) => ({ label: bucket.name, value: bucket.id })) || []}
+        data={bucketData?.map((bucket: any) => ({ label: bucket.name, value: bucket.id })) || []}
         mb="sm"
         maw={800}
       />
@@ -105,7 +105,7 @@ const Dashboard = () => {
         leftSection={<IconSearch size={18} />}
         value={selectedDomain}
         onChange={setSelectedDomain}
-        data={domainData?.map((domain:any) => ({ label: domain.name, value: domain.id })) || []}
+        data={domainData?.map((domain: any) => ({ label: domain.name, value: domain.id })) || []}
         mb="sm"
         maw={800}
       />
@@ -115,15 +115,16 @@ const Dashboard = () => {
         <Dropzone
           onDrop={handleDrop}
           maxSize={5 * 1024 ** 2}
-          accept={[...IMAGE_MIME_TYPE, "application/pdf", "application/msword"]}
+          accept={["application/zip", "application/x-zip-compressed", "application/octet-stream"]}
           styles={{
             root: {
               borderStyle: "dashed",
               cursor: "pointer",
-              "&:hover": { backgroundColor: "#ccc" },
+              "&:hover": { backgroundColor: "#D8DDE2" },
             },
           }}
         >
+
           <Group justify="center" gap="xl" style={{ minHeight: 140, pointerEvents: "none" }}>
             <IconCloudUpload size={40} strokeWidth={1.5} color={theme.colors.gray[5]} />
             <Box>
@@ -164,14 +165,14 @@ const Dashboard = () => {
           </Box>
         )}
 
-         <Group justify="flex-end" mt="md">
-           <Button 
-            variant="filled" 
-             disabled={files.length === 0} 
-             color="blue"
+        <Group justify="flex-end" mt="md">
+          <Button
+            variant="filled"
+            disabled={files.length === 0}
+            color="blue"
           >
-            Upload {files.length > 0 ? `(${files.length})` : ""}  
-         </Button>
+            Upload {files.length > 0 ? `(${files.length})` : ""}
+          </Button>
         </Group>
       </Box>
     </Paper>

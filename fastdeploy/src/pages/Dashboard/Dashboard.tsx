@@ -25,38 +25,73 @@ import { useQuery } from "@tanstack/react-query";
 import { getBucket, getDomain } from "../../Services/bucket.service";
 import { uploadFile } from "../../Services/fileUpload.service";
 import toast from "react-hot-toast";
+import useBucketStore from "../Store/useBucketStore";
+import useDomainStore from "../Store/useDomainStore";
 
 const Dashboard = () => {
   const theme = useMantineTheme();
   const [files, setFiles] = useState([]);
   const [fileUpload, setFileUpload] = useState(false);
-  const [selectedBucket, setSelectedBucket] = useState(null);
-  const [selectedDomain, setSelectedDomain] = useState(null);
+  const { selectedBucket, setSelectedBucket } = useBucketStore();
+  const { selectedDomain, setSelectedDomain } = useDomainStore();
 
+  console.log('setSelecteddomain👽👽👽👽👽',selectedBucket);
+  console.log('setSelectedBucket😁😁😁😁😁----------------',selectedDomain);
+  
   const { data: bucketData } = useQuery({
     queryKey: ["get-bucket-data"],
-    queryFn: getBucket,
+    queryFn: () => getBucket(),
   });
+
+  console.log('bucketData', bucketData);
+
 
   const { data: domainData } = useQuery({
     queryKey: ["get-domain-data"],
-    queryFn: getDomain,
+    queryFn: () => getDomain(),
   });
 
   const handleDrop = async (acceptedFiles: FileWithPath[]) => {
+    console.log('acceptedFiles 🤩🤩🤩🤩🤩🤩🤩', acceptedFiles);
+    
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     await handleFileUpload(acceptedFiles);
   };
 
+  // const handleFileUpload = async (files: FileWithPath[]) => {
+  //   if (!files.length) return;
+  //   setFileUpload(true);
+
+  //   try {
+  //     const results = await Promise.all(files.map(uploadFile));
+  //     results.forEach(({ status, message }) =>
+  //       status === "success" ? toast.success(message) : toast.error(message || "Upload failed")
+  //     );
+  //   } catch (error) {
+  //     console.error("Upload error:", error);
+  //     toast.error("Error uploading files");
+  //   } finally {
+  //     setFileUpload(false);
+  //   }
+  // };
+
   const handleFileUpload = async (files: FileWithPath[]) => {
     if (!files.length) return;
     setFileUpload(true);
-
+  
     try {
-      const results = await Promise.all(files.map(uploadFile));
-      results.forEach(({ status, message }) =>
-        status === "success" ? toast.success(message) : toast.error(message || "Upload failed")
-      );
+      const response = await uploadFile(files);
+      const { status, message, uploaded_files, errors } = response.data;
+  
+      if (status === "success") {
+        toast.success(message);
+      } else {
+        toast.error(message || "Upload failed");
+      }
+  
+      if (errors?.length) {
+        errors.forEach(err => toast.error(err));
+      }
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Error uploading files");
@@ -64,7 +99,7 @@ const Dashboard = () => {
       setFileUpload(false);
     }
   };
-
+  
 
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -82,6 +117,10 @@ const Dashboard = () => {
     }
   };
 
+  const bucketList = bucketData?.data || []; 
+  const domainList = domainData?.data || []; 
+
+
   return (
     <Paper shadow="xs" p="md" m={20} radius="md" withBorder>
       <Title order={4} mb="sm">Bucket Name</Title>
@@ -89,24 +128,34 @@ const Dashboard = () => {
         placeholder="Select Bucket"
         size="md"
         radius="md"
+        searchable
         leftSection={<IconSearch size={18} />}
-        value={selectedBucket}
-        onChange={setSelectedBucket}
-        data={bucketData?.map((bucket: any) => ({ label: bucket.name, value: bucket.id })) || []}
+        data={bucketList.map((bucket: string) => ({
+          value: bucket,
+          label: bucket,
+        }))} 
+        onChange={(value: string | null) => {
+          if (value) setSelectedBucket(value);
+        }}
         mb="sm"
         maw={800}
       />
 
       <Title order={4} mb="sm">Domain Name</Title>
       <Select
+      searchable
         placeholder="Select Domain"
         size="md"
         radius="md"
         leftSection={<IconSearch size={18} />}
-        value={selectedDomain}
-        onChange={setSelectedDomain}
-        data={domainData?.map((domain: any) => ({ label: domain.name, value: domain.id })) || []}
-        mb="sm"
+        data={domainList.map((domain: string) => ({
+          value: domain,
+          label: domain,
+        }))}
+         onChange={(value: string | null) => {
+          if (value) setSelectedDomain(value);
+        }}
+         mb="sm"
         maw={800}
       />
 
@@ -114,7 +163,8 @@ const Dashboard = () => {
         <Title order={4} mb="sm">Upload Files</Title>
         <Dropzone
           onDrop={handleDrop}
-          maxSize={5 * 1024 ** 2}
+          loading={fileUpload}
+          maxSize={30 * 1024 ** 2}
           accept={["application/zip", "application/x-zip-compressed", "application/octet-stream"]}
           styles={{
             root: {
@@ -135,8 +185,9 @@ const Dashboard = () => {
             </Box>
           </Group>
         </Dropzone>
+        </Box>
 
-        {files.length > 0 && (
+        {/* {files.length > 0 && (
           <Box mt="lg">
             <Text fw={500} size="sm" mb="xs">
               Uploaded Files ({files.length})
@@ -163,9 +214,9 @@ const Dashboard = () => {
               ))}
             </Paper>
           </Box>
-        )}
+        )} */}
 
-        <Group justify="flex-end" mt="md">
+        {/* <Group justify="flex-end" mt="md">
           <Button
             variant="filled"
             disabled={files.length === 0}
@@ -173,8 +224,8 @@ const Dashboard = () => {
           >
             Upload {files.length > 0 ? `(${files.length})` : ""}
           </Button>
-        </Group>
-      </Box>
+        </Group> */}
+     
     </Paper>
   );
 };

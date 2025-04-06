@@ -1,10 +1,10 @@
-import { AppShell, Box, Container, Text } from "@mantine/core";
+import { AppShell, Box, Container, Group, Image, Text } from "@mantine/core";
 import { Outlet } from "react-router-dom";
-
+import rocketIcon from '../assets/rocket.png'
+import pentafoxIcon from '../assets/pentafox_whiteIcon.svg'
 const RootLayout = () => {
   return (
     <AppShell
-      header={{ height: 50 }}
       padding={0}
       styles={{
         root: {
@@ -12,7 +12,7 @@ const RootLayout = () => {
           overflow: 'hidden',
         },
         main: {
-          background: 'none',
+          background: '#fff5f5',
           height: 'calc(100vh - 120px)',
           overflow: 'hidden',
           display: 'flex',
@@ -20,15 +20,75 @@ const RootLayout = () => {
         },
       }}
     >
-      <AppShell.Header style={{ borderBottom: '1px solid #9B9B9B' }} >
-        <Container size='xl' h={50} style={{ display: "flex", justifyContent: "space-between" }}>
-          <Box style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "95%" }}>
-            <Box style={{ display: "flex", justifyContent: "center", width: '100%' }}>
-              <Text style={{ fontSize: 24, fontWeight: 600, color: "dark" }}>
-                Pentafox Web Service
-              </Text>
-            </Box>
+
+      <AppShell.Header
+        style={{
+          borderBottom: '1px solid #9B9B9B',
+          backgroundColor: '#e35237',
+          position: 'relative',
+        }}
+      >
+        <Container
+          size="xl"
+          h={60}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'relative', 
+          }}
+        >
+          <Box style={{ display: 'flex', alignItems: 'center' }}>
+            <Image
+              src={pentafoxIcon}
+              alt="Pentafox Logo"
+              width={30}
+              height={30}
+            />
           </Box>
+
+          <Box style={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}>
+            <Group gap="xs" wrap="nowrap" style={{ flexDirection: 'column', alignItems: 'center' }}>
+              <Group gap="xs" wrap="nowrap">
+                <Text
+                  style={{
+                    fontSize: 'clamp(1.25rem, 2vw, 1.75rem)',
+                    fontWeight: 600,
+                    color: "#fff",
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Pentafox Deploy Zone
+                </Text>
+                <Image
+                mt={10}
+                  src={rocketIcon}
+                  alt="Rocket Icon"
+                  width={30}
+                  height={30}
+                />
+              </Group>
+              <Text
+                size={'10px'}
+                c="white"
+                style={{
+                  whiteSpace: 'nowrap',
+                  marginLeft: '80px',
+                  marginTop: -10,
+                  fontWeight: 500,
+                }}
+              >
+                - Automate. Accelerate. Deploy.
+              </Text>
+            </Group>
+          </Box>
+
+          <Box style={{ width: 30 }} />
         </Container>
       </AppShell.Header>
       <div
@@ -38,7 +98,7 @@ const RootLayout = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#fff5f5',
+          backgroundColor: 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

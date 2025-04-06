@@ -11,6 +11,8 @@ import {
   ActionIcon,
   useMantineTheme,
   Button,
+  Loader,
+  Grid,
 } from "@mantine/core";
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import {
@@ -20,6 +22,8 @@ import {
   IconPhoto,
   IconFileText,
   IconFileZip,
+  IconUpload,
+  IconCheck,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { getBucket, getDomain } from "../../Services/bucket.service";
@@ -34,10 +38,9 @@ const Dashboard = () => {
   const [fileUpload, setFileUpload] = useState(false);
   const { selectedBucket, setSelectedBucket } = useBucketStore();
   const { selectedDomain, setSelectedDomain } = useDomainStore();
+  const [fileStatus, setFileStatus] = useState(false);
 
-  console.log('setSelecteddomain👽👽👽👽👽',selectedBucket);
-  console.log('setSelectedBucket😁😁😁😁😁----------------',selectedDomain);
-  
+
   const { data: bucketData } = useQuery({
     queryKey: ["get-bucket-data"],
     queryFn: () => getBucket(),
@@ -52,43 +55,26 @@ const Dashboard = () => {
   });
 
   const handleDrop = async (acceptedFiles: FileWithPath[]) => {
-    console.log('acceptedFiles 🤩🤩🤩🤩🤩🤩🤩', acceptedFiles);
-    
+
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     await handleFileUpload(acceptedFiles);
   };
 
-  // const handleFileUpload = async (files: FileWithPath[]) => {
-  //   if (!files.length) return;
-  //   setFileUpload(true);
-
-  //   try {
-  //     const results = await Promise.all(files.map(uploadFile));
-  //     results.forEach(({ status, message }) =>
-  //       status === "success" ? toast.success(message) : toast.error(message || "Upload failed")
-  //     );
-  //   } catch (error) {
-  //     console.error("Upload error:", error);
-  //     toast.error("Error uploading files");
-  //   } finally {
-  //     setFileUpload(false);
-  //   }
-  // };
-
   const handleFileUpload = async (files: FileWithPath[]) => {
     if (!files.length) return;
     setFileUpload(true);
-  
+
     try {
       const response = await uploadFile(files);
-      const { status, message, uploaded_files, errors } = response.data;
-  
+      const { status, message, errors } = response.data;
+
       if (status === "success") {
         toast.success(message);
+        setFileStatus(true);
       } else {
         toast.error(message || "Upload failed");
       }
-  
+
       if (errors?.length) {
         errors.forEach(err => toast.error(err));
       }
@@ -99,7 +85,6 @@ const Dashboard = () => {
       setFileUpload(false);
     }
   };
-  
 
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -117,12 +102,14 @@ const Dashboard = () => {
     }
   };
 
-  const bucketList = bucketData?.data || []; 
-  const domainList = domainData?.data || []; 
+  const bucketList = bucketData?.data || [];
+  const domainList = domainData?.data || [];
 
 
   return (
-    <Paper shadow="xs" p="md" m={20} radius="md" withBorder>
+    <Paper shadow="xs" p="md" m={10} radius="md" withBorder>
+      <Grid>
+        <Grid.Col span={6} >
       <Title order={4} mb="sm">Bucket Name</Title>
       <Select
         placeholder="Select Bucket"
@@ -133,17 +120,17 @@ const Dashboard = () => {
         data={bucketList.map((bucket: string) => ({
           value: bucket,
           label: bucket,
-        }))} 
+        }))}
         onChange={(value: string | null) => {
           if (value) setSelectedBucket(value);
         }}
-        mb="sm"
-        maw={800}
       />
-
+</Grid.Col>
+<Grid.Col span={6} >
+  
       <Title order={4} mb="sm">Domain Name</Title>
       <Select
-      searchable
+        searchable
         placeholder="Select Domain"
         size="md"
         radius="md"
@@ -152,18 +139,17 @@ const Dashboard = () => {
           value: domain,
           label: domain,
         }))}
-         onChange={(value: string | null) => {
+        onChange={(value: string | null) => {
           if (value) setSelectedDomain(value);
         }}
-         mb="sm"
-        maw={800}
       />
+      </Grid.Col>
+      </Grid>
 
       <Box mt="md">
         <Title order={4} mb="sm">Upload Files</Title>
         <Dropzone
           onDrop={handleDrop}
-          loading={fileUpload}
           maxSize={30 * 1024 ** 2}
           accept={["application/zip", "application/x-zip-compressed", "application/octet-stream"]}
           styles={{
@@ -176,18 +162,34 @@ const Dashboard = () => {
         >
 
           <Group justify="center" gap="xl" style={{ minHeight: 140, pointerEvents: "none" }}>
-            <IconCloudUpload size={40} strokeWidth={1.5} color={theme.colors.gray[5]} />
-            <Box>
-              <Text size="xl">Drag files here or click to select</Text>
-              <Text size="sm" c="dimmed" mt={7}>
-                Accept Only .zip files
-              </Text>
-            </Box>
+            <Dropzone.Accept>
+              <IconUpload size={40} strokeWidth={1.5} color='#ccc' />
+            </Dropzone.Accept>
+            <Dropzone.Reject>
+              <IconX size={40} strokeWidth={1.5} color={theme.colors.red[6]} />
+            </Dropzone.Reject>
+            <Dropzone.Idle>
+              {fileUpload ? (
+                <Loader type="bars" size="md" color={'pink'} />
+              ) : fileStatus ? (
+                <IconCheck style={{ width: 30, height: 30 }} stroke={1.5} color="green" />
+              ) : (
+                <IconCloudUpload
+                  color={'#ccc'}
+                  style={{ width: 30, height: 30 }}
+                  stroke={1.5}
+                />
+              )}
+            </Dropzone.Idle>
+          <Text ta='center' fz='md' mt='xs' c='dimmed'>
+            Drag&apos;n&apos;Drop file here to upload. Accept Only
+            <i>.zip</i> files (Max 30MB).
+          </Text>
           </Group>
         </Dropzone>
-        </Box>
+      </Box>
 
-        {/* {files.length > 0 && (
+      {/* {files.length > 0 && (
           <Box mt="lg">
             <Text fw={500} size="sm" mb="xs">
               Uploaded Files ({files.length})
@@ -216,7 +218,7 @@ const Dashboard = () => {
           </Box>
         )} */}
 
-        {/* <Group justify="flex-end" mt="md">
+  {/* <Group justify="flex-end" mt="md">
           <Button
             variant="filled"
             disabled={files.length === 0}
@@ -225,8 +227,8 @@ const Dashboard = () => {
             Upload {files.length > 0 ? `(${files.length})` : ""}
           </Button>
         </Group> */}
-     
-    </Paper>
+
+    </Paper >
   );
 };
 

@@ -1,8 +1,15 @@
-import { AppShell, Box, Container, Group, Image, Text } from "@mantine/core";
+import { ActionIcon, AppShell, Box, Container, Group, Image, Menu, Text } from "@mantine/core";
 import { Outlet } from "react-router-dom";
 import rocketIcon from '../assets/rocket.png'
 import pentafoxIcon from '../assets/pentafox_whiteIcon.svg'
+import { IconLogout, IconMenu2 } from "@tabler/icons-react";
+import useAuthStore from "../pages/Store/useAuthStore";
 const RootLayout = () => {
+  const { resetAuth } = useAuthStore();
+
+  const handleLogout = () => {
+    resetAuth()
+  };
   return (
     <AppShell
       padding={0}
@@ -78,17 +85,47 @@ const RootLayout = () => {
                 c="white"
                 style={{
                   whiteSpace: 'nowrap',
-                  marginLeft: '80px',
+                  // marginLeft: '80px',
                   marginTop: -10,
                   fontWeight: 500,
+                  marginRight: 25,
                 }}
               >
-                - Automate. Accelerate. Deploy.
+                Automate. Accelerate. Deploy.
               </Text>
             </Group>
           </Box>
 
-          <Box style={{ width: 30 }} />
+          <Box style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+              <Group>
+                <Menu width={180} position="bottom-end" withArrow>
+                  <Menu.Target>
+                    <Box
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <ActionIcon size="xl" variant="transparent">
+                        <IconMenu2 color="#fff" />
+                      </ActionIcon>
+                    </Box>
+                  </Menu.Target>
+
+                  <Menu.Dropdown>
+                    <Menu.Label> Settings</Menu.Label>
+                        <Menu.Item
+                          leftSection={<IconLogout size={16} />}
+                          color="red"
+                          onClick={() => {handleLogout()}}>
+                          Logout
+                        </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Group>
+         
+          </Box>
         </Container>
       </AppShell.Header>
       <div

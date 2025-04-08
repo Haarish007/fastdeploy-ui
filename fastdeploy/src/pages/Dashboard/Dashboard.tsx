@@ -73,34 +73,37 @@ const Dashboard = () => {
         setFileStatus(true);
       } else {
         toast.error(message || "Upload failed");
+        setFileStatus(false);
       }
 
       if (errors?.length) {
         errors.forEach(err => toast.error(err));
+        setFileStatus(false);
       }
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Error uploading files");
+      setFileStatus(false);
     } finally {
       setFileUpload(false);
     }
   };
 
-  const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
+  // const removeFile = (index: number) => {
+  //   setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  // };
 
-  const getFileIcon = (file: FileWithPath) => {
-    const fileType = file.type.split("/")[0];
-    switch (fileType) {
-      case "image":
-        return <IconPhoto size={24} color={theme.colors.blue[5]} />;
-      case "application":
-        return <IconFileZip size={24} color={theme.colors.orange[5]} />;
-      default:
-        return <IconFileText size={24} color={theme.colors.gray[5]} />;
-    }
-  };
+  // const getFileIcon = (file: FileWithPath) => {
+  //   const fileType = file.type.split("/")[0];
+  //   switch (fileType) {
+  //     case "image":
+  //       return <IconPhoto size={24} color={theme.colors.blue[5]} />;
+  //     case "application":
+  //       return <IconFileZip size={24} color={theme.colors.orange[5]} />;
+  //     default:
+  //       return <IconFileText size={24} color={theme.colors.gray[5]} />;
+  //   }
+  // };
 
   const bucketList = bucketData?.data || [];
   const domainList = domainData?.data || [];

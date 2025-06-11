@@ -63,7 +63,7 @@ const RootLayout = () => {
                     lineHeight: 1.2,
                   }}
                 >
-                  Pentafox Deploy Zone
+                  Pentafox Deploy Zones
                 </Text>
                 <Image
                 mt={10}

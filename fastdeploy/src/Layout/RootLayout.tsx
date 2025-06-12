@@ -63,7 +63,7 @@ const RootLayout = () => {
                     lineHeight: 1.2,
                   }}
                 >
-                  Pentafox Deploy Zones Haarish
+                  Pentafox Deploy Zones Sriram
                 </Text>
                 <Image
                 mt={10}
